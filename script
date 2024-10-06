@@ -1,7 +1,8 @@
--- Ultra-Schnelles Auto-Attack und Teleport Script
+-- Auto-Attack und Teleport Script
 
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
 
 -- Funktion zum Finden von Gegnern
 function findEnemy()
@@ -9,9 +10,9 @@ function findEnemy()
     local shortestDistance = math.huge
     
     for _, entity in pairs(workspace:GetChildren()) do
-        if entity:FindFirstChild("Humanoid") and entity ~= character then -- Gegner müssen einen Humanoid haben
+        if entity:IsA("Model") and entity:FindFirstChild("Humanoid") and entity ~= character then
             local distance = (character.HumanoidRootPart.Position - entity.HumanoidRootPart.Position).magnitude
-            if distance < shortestDistance and entity.Humanoid.Health > 0 then -- Stelle sicher, dass der Gegner lebt
+            if distance < shortestDistance and entity.Humanoid.Health > 0 then
                 shortestDistance = distance
                 closestEnemy = entity
             end
@@ -25,16 +26,18 @@ end
 while true do
     local enemy = findEnemy()
     if enemy then
-        -- Spieler über den Gegner teleportieren
+        -- Teleportiere den Spieler über den Gegner
         character.HumanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0) -- 10 Studs über dem Gegner
 
-        -- Ultra-schneller Angriff: so oft wie möglich, ohne Wartezeit
+        -- Ultra-schneller Angriff
         while enemy.Humanoid.Health > 0 do
-            enemy.Humanoid:TakeDamage(9999) -- Setze extrem hohen Schaden, um Gegner sofort zu besiegen
-            wait(0) -- Keine Wartezeit für sofortige Angriffe
+            enemy.Humanoid:TakeDamage(100) -- Setze hohen Schaden, um den Gegner schnell zu besiegen
+            wait(0.1) -- Kurze Wartezeit zwischen den Angriffen, um die Performance zu optimieren
         end
         
         -- Warte, bis der Gegner besiegt ist, bevor zum nächsten teleportiert wird
+        wait(0.5) -- Warte kurz, bevor der nächste Gegner gesucht wird
+    else
+        wait(0.5) -- Warte kurz, wenn kein Gegner gefunden wurde
     end
-    wait(0.1) -- Warte kurz, bevor der nächste Gegner gesucht wird
 end
