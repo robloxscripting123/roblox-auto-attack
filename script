@@ -4,15 +4,20 @@ local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 
+-- Funktion um zu prüfen, ob der Gegner angreifbar ist
+local function isEnemyAttackable(entity)
+    return entity:IsA("Model") and entity:FindFirstChild("Humanoid") and entity.Humanoid.Health > 0
+end
+
 -- Funktion zum Finden von Gegnern
-function findEnemy()
+local function findEnemy()
     local closestEnemy = nil
     local shortestDistance = 1000 -- Maximaler Suchradius von 1000 Studs
 
     for _, entity in pairs(workspace:GetChildren()) do
-        if entity:IsA("Model") and entity:FindFirstChild("Humanoid") and entity ~= character then
+        if isEnemyAttackable(entity) then
             local distance = (character.HumanoidRootPart.Position - entity.HumanoidRootPart.Position).magnitude
-            if distance < shortestDistance and entity.Humanoid.Health > 0 then
+            if distance < shortestDistance then
                 shortestDistance = distance
                 closestEnemy = entity
             end
@@ -24,23 +29,28 @@ end
 
 -- Gegner verfolgen und angreifen
 while true do
-    local enemy = findEnemy()
-    if enemy then
-        -- Teleportiere den Spieler über den Gegner
-        character.HumanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0) -- 10 Studs über dem Gegner
+    -- Stelle sicher, dass der Charakter existiert und im Spiel ist
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        local enemy = findEnemy()
+        if enemy then
+            -- Teleportiere den Spieler über den Gegner
+            character.HumanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0) -- 10 Studs über dem Gegner
 
-        -- Überprüfen, ob der Spieler erfolgreich teleportiert wurde
-        if character.HumanoidRootPart.Position.Y >= enemy.HumanoidRootPart.Position.Y + 5 then
-            -- Ultra-schneller Angriff
-            while enemy.Humanoid.Health > 0 do
-                enemy.Humanoid:TakeDamage(100) -- Setze hohen Schaden, um den Gegner schnell zu besiegen
-                wait(0.1) -- Kurze Wartezeit zwischen den Angriffen
+            -- Überprüfen, ob der Spieler erfolgreich teleportiert wurde
+            if character.HumanoidRootPart.Position.Y >= enemy.HumanoidRootPart.Position.Y + 5 then
+                -- Ultra-schneller Angriff
+                while enemy.Humanoid.Health > 0 do
+                    enemy.Humanoid:TakeDamage(100) -- Setze hohen Schaden, um den Gegner schnell zu besiegen
+                    wait(0.1) -- Kurze Wartezeit zwischen den Angriffen
+                end
             end
+            
+            -- Warte, bis der Gegner besiegt ist, bevor zum nächsten teleportiert wird
+            wait(0.5) -- Warte kurz, bevor der nächste Gegner gesucht wird
+        else
+            wait(0.5) -- Warte kurz, wenn kein Gegner gefunden wurde
         end
-        
-        -- Warte, bis der Gegner besiegt ist, bevor zum nächsten teleportiert wird
-        wait(0.5) -- Warte kurz, bevor der nächste Gegner gesucht wird
     else
-        wait(0.5) -- Warte kurz, wenn kein Gegner gefunden wurde
+        wait(1) -- Warte, wenn der Charakter nicht vorhanden ist
     end
 end
