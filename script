@@ -1,0 +1,40 @@
+-- Ultra-Schnelles Auto-Attack und Teleport Script
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+-- Funktion zum Finden von Gegnern
+function findEnemy()
+    local closestEnemy = nil
+    local shortestDistance = math.huge
+    
+    for _, entity in pairs(workspace:GetChildren()) do
+        if entity:FindFirstChild("Humanoid") and entity ~= character then -- Gegner müssen einen Humanoid haben
+            local distance = (character.HumanoidRootPart.Position - entity.HumanoidRootPart.Position).magnitude
+            if distance < shortestDistance and entity.Humanoid.Health > 0 then -- Stelle sicher, dass der Gegner lebt
+                shortestDistance = distance
+                closestEnemy = entity
+            end
+        end
+    end
+    
+    return closestEnemy
+end
+
+-- Gegner verfolgen und angreifen
+while true do
+    local enemy = findEnemy()
+    if enemy then
+        -- Spieler über den Gegner teleportieren
+        character.HumanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0) -- 10 Studs über dem Gegner
+
+        -- Ultra-schneller Angriff: so oft wie möglich, ohne Wartezeit
+        while enemy.Humanoid.Health > 0 do
+            enemy.Humanoid:TakeDamage(9999) -- Setze extrem hohen Schaden, um Gegner sofort zu besiegen
+            wait(0) -- Keine Wartezeit für sofortige Angriffe
+        end
+        
+        -- Warte, bis der Gegner besiegt ist, bevor zum nächsten teleportiert wird
+    end
+    wait(0.1) -- Warte kurz, bevor der nächste Gegner gesucht wird
+end
