@@ -7,8 +7,8 @@ local humanoid = character:WaitForChild("Humanoid")
 -- Funktion zum Finden von Gegnern
 function findEnemy()
     local closestEnemy = nil
-    local shortestDistance = math.huge
-    
+    local shortestDistance = 1000 -- Maximaler Suchradius von 1000 Studs
+
     for _, entity in pairs(workspace:GetChildren()) do
         if entity:IsA("Model") and entity:FindFirstChild("Humanoid") and entity ~= character then
             local distance = (character.HumanoidRootPart.Position - entity.HumanoidRootPart.Position).magnitude
@@ -18,7 +18,7 @@ function findEnemy()
             end
         end
     end
-    
+
     return closestEnemy
 end
 
@@ -29,10 +29,13 @@ while true do
         -- Teleportiere den Spieler über den Gegner
         character.HumanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0) -- 10 Studs über dem Gegner
 
-        -- Ultra-schneller Angriff
-        while enemy.Humanoid.Health > 0 do
-            enemy.Humanoid:TakeDamage(100) -- Setze hohen Schaden, um den Gegner schnell zu besiegen
-            wait(0.1) -- Kurze Wartezeit zwischen den Angriffen, um die Performance zu optimieren
+        -- Überprüfen, ob der Spieler erfolgreich teleportiert wurde
+        if character.HumanoidRootPart.Position.Y >= enemy.HumanoidRootPart.Position.Y + 5 then
+            -- Ultra-schneller Angriff
+            while enemy.Humanoid.Health > 0 do
+                enemy.Humanoid:TakeDamage(100) -- Setze hohen Schaden, um den Gegner schnell zu besiegen
+                wait(0.1) -- Kurze Wartezeit zwischen den Angriffen
+            end
         end
         
         -- Warte, bis der Gegner besiegt ist, bevor zum nächsten teleportiert wird
