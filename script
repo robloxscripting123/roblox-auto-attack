@@ -1,18 +1,18 @@
--- Auto-Attack und Teleport Script
+-- Auto-Attack and Teleport Script
 
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 
--- Funktion um zu prüfen, ob der Gegner angreifbar ist
+-- Function to check if an enemy is attackable
 local function isEnemyAttackable(entity)
     return entity:IsA("Model") and entity:FindFirstChild("Humanoid") and entity.Humanoid.Health > 0
 end
 
--- Funktion zum Finden von Gegnern
+-- Function to find an enemy
 local function findEnemy()
     local closestEnemy = nil
-    local shortestDistance = 1000 -- Maximaler Suchradius von 1000 Studs
+    local shortestDistance = 1000 -- Max search radius of 1000 studs
 
     for _, entity in pairs(workspace:GetChildren()) do
         if isEnemyAttackable(entity) then
@@ -27,30 +27,36 @@ local function findEnemy()
     return closestEnemy
 end
 
--- Gegner verfolgen und angreifen
+-- Main loop to attack enemies
 while true do
-    -- Stelle sicher, dass der Charakter existiert und im Spiel ist
     if character and character:FindFirstChild("HumanoidRootPart") then
         local enemy = findEnemy()
+        
         if enemy then
-            -- Teleportiere den Spieler über den Gegner
-            character.HumanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0) -- 10 Studs über dem Gegner
-
-            -- Überprüfen, ob der Spieler erfolgreich teleportiert wurde
+            print("Found enemy: " .. enemy.Name) -- Debug: Found an enemy
+            
+            -- Teleport player above the enemy
+            character.HumanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0) -- 10 studs above the enemy
+            print("Teleporting above enemy.") -- Debug: Teleporting
+            
+            -- Check if the player is successfully teleported
             if character.HumanoidRootPart.Position.Y >= enemy.HumanoidRootPart.Position.Y + 5 then
-                -- Ultra-schneller Angriff
+                -- Fast attack
                 while enemy.Humanoid.Health > 0 do
-                    enemy.Humanoid:TakeDamage(100) -- Setze hohen Schaden, um den Gegner schnell zu besiegen
-                    wait(0.1) -- Kurze Wartezeit zwischen den Angriffen
+                    enemy.Humanoid:TakeDamage(100) -- Deal damage to quickly defeat the enemy
+                    print("Attacking enemy: " .. enemy.Name) -- Debug: Attacking
+                    wait(0.1) -- Short wait between attacks
                 end
             end
             
-            -- Warte, bis der Gegner besiegt ist, bevor zum nächsten teleportiert wird
-            wait(0.5) -- Warte kurz, bevor der nächste Gegner gesucht wird
+            print("Enemy defeated: " .. enemy.Name) -- Debug: Enemy defeated
+            wait(0.5) -- Wait briefly before searching for the next enemy
         else
-            wait(0.5) -- Warte kurz, wenn kein Gegner gefunden wurde
+            print("No enemy found.") -- Debug: No enemy found
+            wait(0.5) -- Wait briefly if no enemy was found
         end
     else
-        wait(1) -- Warte, wenn der Charakter nicht vorhanden ist
+        print("Character not found or HumanoidRootPart missing.") -- Debug: Character issue
+        wait(1) -- Wait if character is not available
     end
 end
